@@ -4,17 +4,27 @@
 #include <sstream>
 #include <string>
 
+/**
+ * @brief Represents an incoming HTTP request.
+ * 
+ * This structure holds the parsed data of an HTTP request, including
+ * method, path, version, headers, and body.
+ */
 struct HttpRequest {
-    std::string method;
-    std::string path;
-    std::string version;
+    std::string method;  ///< HTTP method (e.g., GET, POST)
+    std::string path;    ///< Requested URI path
+    std::string version; ///< HTTP version (e.g., HTTP/1.1)
 
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string> headers; ///< HTTP headers
 
-    std::string body;
+    std::string body; ///< Request body content
 
-    bool isValid = false;
+    bool isValid = false; ///< Flag indicating if the request was parsed successfully
 
+    /**
+     * @brief Converts the request back to a raw string format.
+     * @return A string representation of the HTTP request.
+     */
     std::string to_string() const {
         std::string result = method + " " + path + " " + version + "\r\n";
 
@@ -28,6 +38,14 @@ struct HttpRequest {
         return result;
     }
 
+    /**
+     * @brief Parses a raw HTTP request string.
+     * 
+     * Extracts method, path, version, headers, and body from the raw input.
+     * Sets the isValid flag to true if parsing is successful.
+     * 
+     * @param raw The raw HTTP request string to parse.
+     */
     void parse(const std::string &raw) {
         isValid = false;
 
