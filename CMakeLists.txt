@@ -15,6 +15,3 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_subdirectory(chizik)
-
-add_executable(http_server main.cpp)
-target_link_libraries(http_server PRIVATE chizik)
