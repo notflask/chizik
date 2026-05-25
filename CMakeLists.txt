@@ -15,3 +15,10 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_subdirectory(chizik)
+
+# Examples
+add_executable(http_server_example examples/http_server.cpp)
+target_link_libraries(http_server_example PRIVATE chizik)
+
+add_executable(file_server_example examples/file_server.cpp)
+target_link_libraries(file_server_example PRIVATE chizik)

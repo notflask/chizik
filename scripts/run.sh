@@ -44,9 +44,12 @@ if [[ "$TARGET" == "chizik_tests" ]]; then
     EXECUTABLE="$BUILD_DIR/chizik/tests/chizik_tests"
 fi
 
+echo "Building $TARGET..."
+./scripts/build.sh -t "$BUILD_TYPE" "$TARGET"
+
 if [ ! -f "$EXECUTABLE" ]; then
-    echo "Executable $EXECUTABLE not found. Building first..."
-    ./scripts/build.sh -t "$BUILD_TYPE" "$TARGET"
+    echo "Error: Executable $EXECUTABLE not found after build."
+    exit 1
 fi
 
 echo "Running $EXECUTABLE..."
