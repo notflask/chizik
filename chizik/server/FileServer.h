@@ -36,16 +36,21 @@ public:
 
               fs::path path = m_root_path / relative_path;
 
-              if (fs::exists(path) && fs::is_regular_file(path)) {
-                  std::stringstream buffer;
-                  std::ifstream file(path.c_str(), std::ios::binary);
-                  buffer << file.rdbuf();
+              // Path Traversal Fix
+              fs::path canonical = fs::weakly_canonical(path);
+              if (canonical.string().find(fs::weakly_canonical(m_root_path).string()) != 0) {
+                  m_file_not_found_handler(req, res);
+                  return;
+              }
 
+              if (fs::exists(canonical) && fs::is_regular_file(canonical)) {
+                  std::ifstream file(canonical, std::ios::binary);
+                  std::stringstream buffer;
+                  buffer << file.rdbuf();
                   res.status_code = 200;
                   res.status_message = "OK";
                   res.body = buffer.str();
-
-                  auto content_type = ContentTypeResolver::determine(path.string());
+                  auto content_type = ContentTypeResolver::determine(canonical.string());
                   res.headers["Content-Type"] = ContentTypeResolver::toString(content_type);
               } else {
                   m_file_not_found_handler(req, res);
