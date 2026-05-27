@@ -3,13 +3,13 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "Socket.h"
-#include <unordered_map>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 /**
  * @brief Core HTTP Server class for routing and handling requests.
- * 
+ *
  * Allows registering handlers for different HTTP methods and paths.
  */
 class HttpServer {
@@ -55,16 +55,16 @@ public:
    */
   void notFound(Handler handler) { m_not_found_handler = handler; }
 
+private:
+  Socket m_sock; ///< Underlying socket for network I/O
+  std::unordered_map<std::string, Handler> m_routes; ///< Registered route map
+
   /**
    * @brief Internal helper to find a handler for a given routing key.
    * @param key The combined method and path (e.g., "GET /index").
    * @return Handler* Pointer to the handler if found, nullptr otherwise.
    */
   Handler *find_handler(const std::string &key);
-
-private:
-  Socket m_sock;                                     ///< Underlying socket for network I/O
-  std::unordered_map<std::string, Handler> m_routes; ///< Registered route map
 
   /**
    * @brief Default handler for 404 Not Found.

@@ -2,16 +2,16 @@
 #include <iostream>
 
 int main() {
-    FileServer server(8080, "public");
+  FileServer server(8080, "public");
 
-    server.notFound([](const HttpRequest& req, HttpResponse& res) {
-        res.status_code = 404;
-        res.status_message = "Not Found";
-        res.body = "<h1>Meine custom 404 Seite</h1>";
-        res.headers["Content-Type"] = "text/html";
-    });
+  server.notFound([](const HttpRequest &req, HttpResponse &res) {
+    res.status_code = 404;
+    res.status_message = "Not Found";
+    res.body = "<h1>Meine custom 404 Seite</h1>";
+    res.headers["Content-Type"] = "text/html";
+  });
 
-    std::cout << "FileServer running on http://localhost:8080\n";
-    server.run();
-    return 0;
+  std::cout << "FileServer running on http://localhost:8080\n";
+  server.run();
+  return 0;
 }

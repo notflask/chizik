@@ -21,7 +21,7 @@ void HttpServer::run() {
 
     HttpResponse response;
 
-    Handler* handler = find_handler(request.method + " " + request.path);
+    Handler *handler = find_handler(request.method + " " + request.path);
 
     if (handler == nullptr) {
       m_not_found_handler(request, response);
@@ -30,7 +30,7 @@ void HttpServer::run() {
         (*handler)(request, response);
       } catch (const std::exception &e) {
         response.status_code = 500;
-        response.body = "Internal Server Errror";
+        response.body = "Internal Server Error";
       }
     }
 
