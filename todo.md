@@ -9,9 +9,9 @@
 
 ## ✨ Fehlende Features
 
-- [ ] `HttpServer` — keine `put()` und `delete_()` Methoden
+- [x] `HttpServer` — keine `put()` und `delete_()` Methoden
 - [ ] `HttpServer` — Multithreading fehlt, aktuell nur ein Request gleichzeitig möglich
-- [ ] `ContentType` — fehlt `svg`, `ico`, `json`, `gif`, `woff`, `woff2`
+- [x] `ContentType` — fehlt `svg`, `ico`, `json`, `gif`, `woff`, `woff2`
 - [x] `FileServer` — kein Schutz gegen Path Traversal (`../../etc/passwd`)
 
 ## 🧹 Code-Qualität

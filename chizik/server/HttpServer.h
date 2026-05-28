@@ -50,6 +50,24 @@ public:
   }
 
   /**
+   * @brief Registers a PUT request handler for a specific path.
+   * @param path The URI path to handle.
+   * @param handler The function to execute.
+   */
+  void put(const std::string &path, Handler handler) {
+    m_routes["PUT " + path] = handler;
+  }
+
+  /**
+   * @brief Registers a DELETE request handler for a specific path.
+   * @param path The URI path to handle.
+   * @param handler The function to execute.
+   */
+  void delete_(const std::string &path, Handler handler) {
+    m_routes["DELETE " + path] = handler;
+  }
+
+  /**
    * @brief Customizes the handler for 404 Not Found responses.
    * @param handler The function to execute for unknown routes.
    */
