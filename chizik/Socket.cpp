@@ -1,50 +1,57 @@
 #include "Socket.h"
+#include <cstring>
+#include <iostream>
+#include <sys/socket.h>
 
-Socket::Socket(const int port) : m_Client(0), m_Result(0) {
+Socket::Socket(const int port) {
   m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+
+  if (m_Sock < 0) {
+    std::cerr << "Error creating socket: " << strerror(errno) << std::endl;
+    exit(1);
+  }
+
+  int opt = 1;
+  setsockopt(m_Sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+#ifdef __APPLE__
+  setsockopt(m_Sock, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+#endif
+
   m_SockAddr.sin_family = AF_INET;
   m_SockAddr.sin_addr.s_addr = INADDR_ANY;
   m_SockAddr.sin_port = htons(port);
 
-  m_Result = bind(m_Sock, (struct sockaddr *)&m_SockAddr, sizeof(m_SockAddr));
-  assert(m_Result == 0 && "Failed to bind socket!");
+  if (bind(m_Sock, (struct sockaddr *)&m_SockAddr, sizeof(m_SockAddr)) < 0) {
+    std::cerr << "Failed to bind to port " << port << ": " << strerror(errno)
+              << std::endl;
+    exit(1);
+  }
 
-  m_Result = listen(m_Sock, 5);
-  assert(m_Result == 0 && "Error on listen()");
+  if (listen(m_Sock, 5) < 0) {
+    std::cerr << "Error on listen(): " << strerror(errno) << std::endl;
+    exit(1);
+  }
 }
 
-Socket::~Socket() {
-  this->closeConnection();
-  close(this->m_Sock);
+Socket::~Socket() { close(this->m_Sock); }
+
+std::unique_ptr<ClientSocket> Socket::acceptConnection() {
+  int client_fd = accept(this->m_Sock, nullptr, nullptr);
+  if (client_fd < 0)
+    return nullptr;
+
+  return std::make_unique<ClientSocket>(client_fd);
 }
 
-void Socket::acceptConnection() {
-  this->m_Client = accept(this->m_Sock, nullptr, nullptr);
-}
-
-std::string Socket::receiveMessage() const {
+std::string ClientSocket::receive() const {
   char buffer[4096];
-  int received = recv(this->m_Client, buffer, sizeof(buffer), 0);
-
-  if (received == 0) {
+  int received = recv(this->m_fd, buffer, sizeof(buffer), 0);
+  if (received <= 0)
     return "";
-  }
-
-  if (received > 0) {
-    std::string msg(buffer, received);
-    return msg;
-  }
-
-  return "";
+  return std::string(buffer, received);
 }
 
-void Socket::sendMessage(const std::string &message) {
-  send(m_Client, message.c_str(), message.size(), 0);
-}
-
-void Socket::closeConnection() {
-  if (this->m_Client != 0) {
-    close(this->m_Client);
-    this->m_Client = 0;
-  }
+void ClientSocket::send(const std::string &message) const {
+  ::send(this->m_fd, message.c_str(), message.size(), 0);
 }

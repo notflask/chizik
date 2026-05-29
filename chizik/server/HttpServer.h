@@ -5,6 +5,7 @@
 #include "Socket.h"
 #include <functional>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 /**

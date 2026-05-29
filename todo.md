@@ -10,7 +10,13 @@
 ## ✨ Fehlende Features
 
 - [x] `HttpServer` — keine `put()` und `delete_()` Methoden
-- [ ] `HttpServer` — Multithreading fehlt, aktuell nur ein Request gleichzeitig möglich
+- [x] `HttpServer` — Multithreading fehlt, aktuell nur ein Request gleichzeitig möglich
+- [ ] `HttpServer` — **Thread Pool Optimierung** (für M4 Pro Performance)
+    - [ ] `chizik/ThreadPool.h` erstellen
+    - [ ] Queue für Tasks und Worker-Threads implementieren
+    - [ ] Synchronisation mit `std::mutex` und `std::condition_variable`
+    - [ ] Integration in `HttpServer::run()`
+    - [ ] Tuning mit `std::thread::hardware_concurrency()`
 - [x] `ContentType` — fehlt `svg`, `ico`, `json`, `gif`, `woff`, `woff2`
 - [x] `FileServer` — kein Schutz gegen Path Traversal (`../../etc/passwd`)
 

@@ -1,43 +1,44 @@
 #include "HttpServer.h"
+#include "HttpRequest.h"
+#include "HttpResponse.h"
+#include <exception>
+#include <thread>
+#include <utility>
 
 void HttpServer::run() {
   while (true) {
-    m_sock.acceptConnection();
-
-    auto raw = m_sock.receiveMessage();
-
-    if (raw.empty()) {
-      m_sock.closeConnection();
+    auto client = m_sock.acceptConnection();
+    if (!client)
       continue;
-    }
 
-    HttpRequest request;
-    request.parse(raw);
+    std::jthread([this, c = std::move(client)]() mutable {
+      auto raw = c->receive();
+      if (raw.empty())
+        return;
 
-    if (!request.isValid) {
-      m_sock.closeConnection();
-      continue;
-    }
+      HttpRequest request;
+      request.parse(raw);
+      if (!request.isValid)
+        return;
 
-    HttpResponse response;
+      HttpResponse response;
+      Handler *handler = find_handler(request.method + " " + request.path);
 
-    Handler *handler = find_handler(request.method + " " + request.path);
-
-    if (handler == nullptr) {
-      m_not_found_handler(request, response);
-    } else {
-      try {
-        (*handler)(request, response);
-      } catch (const std::exception &e) {
-        response.status_code = 500;
-        response.body = "Internal Server Error";
+      if (handler == nullptr) {
+        m_not_found_handler(request, response);
+      } else {
+        try {
+          (*handler)(request, response);
+        } catch (const std::exception &e) {
+          response.status_code = 500;
+          response.body = "Internal Server Error";
+        }
       }
-    }
 
-    response.headers["Content-Length"] = std::to_string(response.body.size());
+      response.headers["Content-Length"] = std::to_string(response.body.size());
 
-    m_sock.sendMessage(response.to_string());
-    m_sock.closeConnection();
+      c->send(response.to_string());
+    }).detach();
   }
 }
 

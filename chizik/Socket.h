@@ -1,54 +1,82 @@
 #pragma once
 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <cassert>
-#include <unistd.h>
+#include <memory>
+#include <netinet/in.h>
 #include <string>
+#include <sys/socket.h>
+#include <unistd.h>
+
+/**
+ * @class ClientSocket
+ * @brief Represents an active client connection.
+ * 
+ * Uses RAII to ensure the socket is closed when the object goes out of scope.
+ */
+class ClientSocket {
+  int m_fd;
+
+public:
+  /**
+   * @brief Construct a new Client Socket object.
+   * @param fd The file descriptor for the client connection.
+   */
+  explicit ClientSocket(int fd) : m_fd(fd) {}
+
+  /**
+   * @brief Destroy the Client Socket object and closes the connection.
+   */
+  ~ClientSocket() {
+    if (m_fd >= 0)
+      close(m_fd);
+  };
+
+  /**
+   * @brief Reads a message from the client.
+   * @return The message read as a string.
+   */
+  std::string receive() const;
+
+  /**
+   * @brief Sends a message to the client.
+   * @param message The string message to send.
+   */
+  void send(const std::string &message) const;
+
+  ClientSocket(const ClientSocket &) = delete;
+
+  /**
+   * @brief Move constructor for ClientSocket.
+   */
+  ClientSocket(ClientSocket &&other) noexcept : m_fd(other.m_fd) {
+    other.m_fd = -1;
+  }
+};
 
 /**
  * @brief A simple wrapper around POSIX sockets.
- * 
- * Handles basic socket lifecycle: creation, binding, listening, 
+ *
+ * Handles basic socket lifecycle: creation, binding, listening,
  * accepting connections, and basic I/O.
  */
 class Socket {
 private:
-    int m_Sock;             ///< Server socket file descriptor
-    sockaddr_in m_SockAddr; ///< Socket address configuration
-    int m_Client;           ///< Current client connection file descriptor
-    int m_Result;           ///< Result code of the last operation
+  int m_Sock;             ///< Server socket file descriptor
+  sockaddr_in m_SockAddr; ///< Socket address configuration
 public:
-    /**
-     * @brief Construct a new Socket object and binds to a port.
-     * @param port The port number to listen on.
-     */
-    Socket(int port);
+  /**
+   * @brief Construct a new Socket object and binds to a port.
+   * @param port The port number to listen on.
+   */
+  Socket(int port);
 
-    /**
-     * @brief Destroy the Socket object and closes open descriptors.
-     */
-    ~Socket();
+  /**
+   * @brief Destroy the Socket object and closes open descriptors.
+   */
+  ~Socket();
 
-    /**
-     * @brief Blocks until a new client connection is accepted.
-     */
-    void acceptConnection();
-
-    /**
-     * @brief Closes the current client connection.
-     */
-    void closeConnection();
-
-    /**
-     * @brief Reads a message from the current client connection.
-     * @return The message read as a string.
-     */
-    std::string receiveMessage() const;
-
-    /**
-     * @brief Sends a message to the current client connection.
-     * @param message The string message to send.
-     */
-    void sendMessage(const std::string& message);
+  /**
+   * @brief Blocks until a new client connection is accepted.
+   */
+  std::unique_ptr<ClientSocket> acceptConnection();
 };

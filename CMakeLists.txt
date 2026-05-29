@@ -22,3 +22,6 @@ target_link_libraries(http_server_example PRIVATE chizik)
 
 add_executable(file_server_example examples/file_server.cpp)
 target_link_libraries(file_server_example PRIVATE chizik)
+
+add_executable(benchmark benchmark.cpp)
+target_link_libraries(benchmark PRIVATE chizik)
